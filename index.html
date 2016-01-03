@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <title>JS Forth</title>
+  <link rel='stylesheet' href='css/forth.css' />
+  <script src='js/io.js'></script>
+  <script src='js/initialStream.js'></script>
+  <script src='js/forth.js'></script>
+  <script>
+    function runForth(fsId) {
+      var fs = document.getElementById(fsId);
+      var parameters = {
+        input: attachInput(fs),
+        output: attachOutput(fs),
+        initialStream: initialStream
+      };
+      parameters.input.push(function(text) {
+        parameters.output.write("<div class='echo'>" + htmlEscape(text) + "</div>");
+        parameters.output.flush();
+      });
+      forth(parameters);
+    }
+    window.onload = function() {
+      document.querySelector('#vm1 textarea').focus();
+      runForth("vm1");
+      runForth("vm2");
+    }
+  </script>
+</head>
+
+<body>
+  <fieldset id='vm1'>
+    <legend>VM 1</legend>
+    <div class='outputArea'>
+      <div class='title'>Output</div>
+      <div class='output'></div>
+    </div>
+    <div class='inputArea'>
+      <div class='title'>Input</div>
+      <div class='taWrapper'>
+        <textarea></textarea>
+      </div>
+      <button>Send</button>
+    </div>
+  </fieldset>
+
+  <fieldset id='vm2'>
+    <legend>VM 2</legend>
+    <div class='outputArea'>
+      <div class='title'>Output</div>
+      <div class='output'></div>
+    </div>
+    <div class='inputArea'>
+      <div class='title'>Input</div>
+      <div class='taWrapper'>
+        <textarea></textarea>
+      </div>
+      <button>Send</button>
+    </div>
+  </fieldset>
+</body>
+
+</html>
