@@ -10,7 +10,7 @@ var initialStream = ("" + function dataStore() {
 1 word   *********************
          ****  Word "bls" ****
          *********************     1 drop
-here                               1 word   Set HERE for settnig new LATEST   1 drop
+here                               1 word   Put HERE for setting LATEST       1 drop
 
 1 drop  1 word bls1 ,              1 word   Name = "bls"                      1 drop
 2 drop  0 ,                        1 word   Immediate = 0                     1 drop
@@ -19,7 +19,7 @@ here                               1 word   Set HERE for settnig new LATEST   1 
 5 drop  1 word (^\s+)|(\s)1 ,      1 word   (^\s+)|(\s)                       1 drop
 6 drop  1 word exit1 find drop ,   1 word   EXIT                              1 drop
 
-current @ !                        1 word   Set New LATEST                    1 drop
+current @ !                        1 word   Set LATEST                        1 drop
 
 
 
@@ -29,17 +29,17 @@ current @ !                        1 word   Set New LATEST                    1 
 1 word   *********************
          ****   Word "("  ****
          *********************    1 drop
-here                    bls word \| dup word   Add comment separator  | drop
+here                    bls word \| dup word   Add a comment separator  | drop
 
-1 drop  bls word ( ,                dup word   Name="("               | drop
-2 drop  1 ,                         dup word   Immediate = 1          | drop
-3 drop  current @ @ ,               dup word   Prev = LATEST          | drop
-4 drop  bls word lit find drop ,    dup word   LIT                    | drop
-5 drop  bls word \) ,               dup word   "\)"                   | drop
-6 drop  bls word word find drop ,   dup word   WORD                   | drop
-7 drop  bls word drop find drop ,   dup word   DROP                   | drop
-8 drop  bls word exit find drop ,   dup word   EXIT                   | drop
-                                        word   Drop comment separator | drop
+1 drop  bls word ( ,                dup word   Name="("                 | drop
+2 drop  1 ,                         dup word   Immediate = 1            | drop
+3 drop  current @ @ ,               dup word   Prev = LATEST            | drop
+4 drop  bls word lit find drop ,    dup word   LIT                      | drop
+5 drop  bls word \) ,               dup word   "\)"                     | drop
+6 drop  bls word word find drop ,   dup word   WORD                     | drop
+7 drop  bls word drop find drop ,   dup word   DROP                     | drop
+8 drop  bls word exit find drop ,   dup word   EXIT                     | drop
+                                        word   Drop a comment separator | drop
 current @ !
 
 
@@ -188,10 +188,10 @@ create# :              ( Word ":" )
 
 
 ( Branching helpers )
-: >mark here 0 , ;       \ marks the place where are we going to jump forward from (forward jumps)
-: >resolve here swap ! ; \ marks the place where are we going to jump forward to   (forward jumps)
-: <mark here ;           \ marks the place where are we going to return to         (backward jumps)
-: <resolve , ;           \ marks the place where are we going to return from       (backward jumps)
+: >mark here 0 , ;       \ marks the place where we are going to jump forward from (forward jumps)
+: >resolve here swap ! ; \ marks the place where we are going to jump forward to   (forward jumps)
+: <mark here ;           \ marks the place where we are going to return to         (backward jumps)
+: <resolve , ;           \ marks the place where we are going to return from       (backward jumps)
 
 : ' ( ---> A )
   bls word find
@@ -205,7 +205,7 @@ create# :              ( Word ":" )
 : compile r> dup 1 + >r @ , ;
 : compile, , ;
 
-: state?compile                 \ compiles the next address if its compilation mode or goes to it otherwise
+: state?compile                 \ compiles the next address if we are in compilation mode or goes to this address otherwise
   state @ ?branch [ >mark ]
     r> dup 1 + >r @ ,
   [ >resolve ]
@@ -239,7 +239,8 @@ create# :              ( Word ":" )
 bls word " word  " constant bl  \ Constant "BL"
 
 bls word " word 
-" constant cr                   \ Constant "CR"
+" constant cr.                   \ Constant "CR."
+: cr cr. type ;
 
 : . type bl type ;
 
@@ -303,12 +304,12 @@ bls word " word
 : value create , &value sflag does> @ ;
 : to ' dup &value ?flag" Not a value" cell + ! ;
 
-\ ###########################################################################################################
-\ #  Loops implementations is a slightly modified and extended code from the Baranov's and                  #
-\ #  Nozdrunov's book "FORTH and its implementations" (http://books.google.ru/books?id=99xGAAAACAAJ&hl=ru)  #
-\ ###########################################################################################################
+\ ###############################################################################################################
+\ #  Loops implementations are a slightly modified and extended code from the book "The Forth Language and      #
+\ # its Implementations (http://books.google.ru/books?id=99xGAAAACAAJ&hl=ru) by Baranov S.N. and Nozdrunov N.R. #
+\ ###############################################################################################################
 
-2 constant <begin>  \ begin mark
+2 constant <begin>  \ A 'begin' mark
 
 : begin ?comp <mark <begin> ; immediate
 : until ?comp <begin> ?dest compile ?branch <resolve ; immediate
@@ -321,7 +322,7 @@ bls word " word
 vocabulary private
 
 
-definitions< private   \ compile to "PRIVATE"
+definitions< private   \ compile to PRIVATE vocabulary
 
 : (do) ( a2: limit, a1: first )
   r> ( a2, a1, r:return)
@@ -360,7 +361,7 @@ definitions< private   \ compile to "PRIVATE"
   >r ( goto addr )
 ;
 
-definitions< forth private     \ Compile to "FORTH", look from "PRIVATE"
+definitions< forth private     \ Compile to FORTH vocabulary, search from PRIVATE vocabulary
 
 3 constant <do>
 
@@ -372,7 +373,7 @@ definitions< forth private     \ Compile to "FORTH", look from "PRIVATE"
 : leave r> drop r> drop r> drop ;
 : bleave r> drop ;
 
-forth                \ Look from "FORTH"
+forth                \ Search from FORTH vocabulary
 
 \ ###################################
 \ #   End of loops implementation   #
@@ -419,7 +420,7 @@ hide private
 : dumpLatest     \ 
   latest
   begin
-    dup . lit [ " - " , ] . dup @ . lit [ " - " , ] . dup @ 3 - @ . cr .
+    dup . lit [ " - " , ] . dup @ . lit [ " - " , ] . dup @ 3 - @ . cr
     1 +
     dup here =
   until
@@ -430,8 +431,8 @@ hide private
   ." Loading..."
   null [compile] " " get" http
   200 = not abort" Can't load script"
-  ." ok" cr type
-  drop cr + >str drop
+  ." ok" cr
+  drop cr. + >str drop
 ;
 
 \ #########################################
