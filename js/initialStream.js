@@ -213,7 +213,7 @@ create# :              ( Word ":" )
 
 : ['] ( ---> ) ' compile lit , ; immediate
 
-: (;create) ] r> exit ;   \ The default body for the words created by "CREATE" command
+: (;create) r> exit ;   \ The default body for the words created by "CREATE" command
 
 : create create# compile (;create) ;
 
@@ -386,6 +386,8 @@ forth                \ Search from FORTH vocabulary
 : 1- 1 - ;
 : 1+ 1 + ;
 : negate 0 swap - ;
+: +! dup @ rot + swap ! ;
+: -! dup @ rot - swap ! ;
 
 : depth s0 @ sp@ - 1 - ;
 : ?dup dup if dup then ;
@@ -417,13 +419,14 @@ hide private
 
 : .s sp@ 1 - s0 @ 1 - begin over over < while dup @ . 1 - repeat drop drop ; \ Prints the stack
 : .r rp@ 1 + r0 @ 1 - begin over over < while dup @ . 1 - repeat drop drop ; \ Prints the return stack for the caller of this word
-: dumpLatest     \ 
+: showLatest     \ 
   latest
   begin
-    dup . lit [ " - " , ] . dup @ . lit [ " - " , ] . dup @ 3 - @ . cr
+    dup . ." - " dup @ . ." - " dup @ 3 - @ . cr
     1 +
     dup here =
   until
+  drop
 ;
 
 
@@ -444,7 +447,7 @@ page
 " #####################################
 ##                                 ##
 ##         JS FORTH v1.0           ##
-##   (c) Alexander Martyanov 2015  ##
+##   (c) Alexander Martyanov 2016  ##
 ##                                 ##
 #####################################
 
