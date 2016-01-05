@@ -202,6 +202,8 @@ create# :              ( Word ":" )
 ;
 
 : [compile] ' , ; immediate
+: postpone ' , ; immediate \ the same as [compile]
+
 : compile r> dup 1 + >r @ , ;
 : compile, , ;
 
@@ -278,13 +280,19 @@ bls word " word
 : else ?comp <if> ?dest compile branch >mark swap >resolve <if> ; immediate
 : endif [compile] then ; immediate \ Synonym for "THEN"
 
-: literal
-  state @
-  if compile lit , then
-; immediate
+: lit,
+  compile lit ,
+;
 
-: " lit [ bls word " , ] word [compile] literal ; immediate
-: "( " \)" word [compile] literal ; immediate      \ Gets a string from the stream that ends with ")" (like " word)
+: .literal
+  state @
+    if lit, then
+;
+
+: literal .literal ; immediate
+
+: " lit [ bls word " , ] word .literal ; immediate
+: "( " \)" word .literal ; immediate      \ Gets a string from the stream that ends with ")" (like " word)
 : ," [compile] " state?compile , ; immediate       \ Compiles the string after this word (comp/run)
 : ,( [compile] "( state?compile , ; immediate      \ Compiles the string after this word (comp/run)
 : ." [compile] " state?compile type ; immediate       \ Prints the string after this word   (comp/run)
@@ -302,7 +310,10 @@ bls word " word
 ;
 
 : value create , &value sflag does> @ ;
-: to ' dup &value ?flag" Not a value" cell + ! ;
+: to ' dup &value ?flag" Not a value" cell +
+  state @
+    if lit, compile !
+    else ! then ; immediate
 
 \ ###############################################################################################################
 \ #  Loops implementations are a slightly modified and extended code from the book "The Forth Language and      #
@@ -400,10 +411,12 @@ forth                \ Search from FORTH vocabulary
 : 2>r r> rot >r swap >r >r ;
 : 2r> r> r> r> rot >r swap ;
 : 2r@ r> r> r> 2dup >r >r rot >r swap ;
-: c@ @ ;
-: c! @ ;
+: c@ @ 255 and ;
+: c! swap 255 and swap ! ;
+: c, 255 and , ;
 
-\ lshift, max, min, invert, rshift, 
+: min over over < if drop else swap drop then ;
+: max over over > if drop else swap drop then ;
 
 : hide ' cfa>ffa dup @ &smudge or swap ! ; \ Hides words from the list
 
